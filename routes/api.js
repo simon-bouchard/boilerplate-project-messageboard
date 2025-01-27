@@ -63,6 +63,22 @@ module.exports = function (app) {
 					
 		return res.json(threads)
 	})
+
+	.delete(async (req, res) => {
+
+		const { thread_id, delete_password } = req.body;
+		
+		const thread = await Thread.findOne({_id: thread_id});
+
+		if (thread.delete_password !== delete_password) {
+			return res.send('incorrect password')
+		}
+
+		thread.remove()
+
+		return res.send('success')
+
+	})
     
   app.route('/api/replies/:board')
 	.post(async (req, res) => {
@@ -100,5 +116,32 @@ module.exports = function (app) {
 
 		return res.json(thread)
 	})
+
+	.delete(async (req, res) => {
+		const { thread_id, reply_id, delete_password } = req.body;
+
+		const thread = await Thread.findOne({_id: thread_id});
+
+		if (!thread) {
+			return res.send('incorrect thread id')
+		}
+
+		const reply = thread.replies.id(reply_id);
+
+		if (!reply) {
+			return res.send('incorrect reply id')
+		}
+
+		if (reply.delete_password !== delete_password) {
+			return res.send('incorrect password')
+		}
+
+		reply.text = '[deleted]';
+		await thread.save();
+
+		return res.send('success')
+	})
+
+
 
 };
