@@ -3,6 +3,7 @@ require('dotenv').config();
 const express     = require('express');
 const bodyParser  = require('body-parser');
 const cors        = require('cors');
+const helmet 	  = require('helmet');
 
 const apiRoutes         = require('./routes/api.js');
 const fccTestingRoutes  = require('./routes/fcctesting.js');
@@ -14,6 +15,23 @@ mongoose.connect(process.env.MONGO_URI, {
 	useNewUrlParser: true,
 	useUnifiedTopology: true,
 })
+
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      useDefaults: true,
+      directives: {
+        "frame-ancestors": ["'self'"], // Allow only your site to embed in an iframe
+      },
+    },
+    dnsPrefetchControl: {
+      allow: false, // Disable DNS prefetching
+    },
+    referrerPolicy: {
+      policy: "same-origin", // Send referrer only for same-origin requests
+    },
+  })
+);
 
 app.use('/public', express.static(process.cwd() + '/public'));
 
