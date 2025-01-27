@@ -70,6 +70,10 @@ module.exports = function (app) {
 		
 		const thread = await Thread.findOne({_id: thread_id});
 
+		if (!thread) {
+			return res.send("thread can't be found, invalud id")
+		}
+
 		if (thread.delete_password !== delete_password) {
 			return res.send('incorrect password')
 		}
@@ -78,6 +82,22 @@ module.exports = function (app) {
 
 		return res.send('success')
 
+	})
+
+	.put(async (req, res) => {
+		const thread_id = req.body.thread_id;
+
+		try {
+			let thread = await Thread.findOneAndUpdate(
+				{ _id: thread_id },
+				{reported: true}
+			)
+
+			return res.send('reported')
+
+		} catch {
+			return res.send('Sever error')
+		}
 	})
     
   app.route('/api/replies/:board')
@@ -142,6 +162,26 @@ module.exports = function (app) {
 		return res.send('success')
 	})
 
+	.put(async (req, res) => {
+		const { thread_id, reply_id } = req.body
 
+		const thread = await Thread.findOne({_id: thread_id });
+
+		if (!thread) {
+			return res.send('invalid thread id')
+		}
+
+		const reply = thread.replies.id(reply_id);
+
+		if (!reply) {
+			return res.send('invalid reply id')
+		}
+
+		reply.reported = true;
+
+		await thread.save()
+
+		return res.send('reported')
+	})
 
 };
