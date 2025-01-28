@@ -19,7 +19,16 @@ suite('Functional Tests', function() {
 			})
 			.end((err, res) => {
 				assert.equal(res.status, 200, 'Response status should be 200')
+			})
 
+		chai
+			.request(server)
+			.post('api/threads/test/')
+			.send({
+				text: 'text',
+				delete_password: 'delete'
+			})
+			.end((err, res) => {
 				done();
 			})
 	})
